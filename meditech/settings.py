@@ -16,6 +16,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Definir le nouveau AUTH_USER_MODEL
+
+AUTH_USER_MODEL = 'auth_app.Patient'
+
 
 # Application definition
 
@@ -28,6 +32,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'drf_yasg',
+    'auth_app.apps.AuthConfig',
 ]
 
 MIDDLEWARE = [
@@ -113,3 +119,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOW_ALL_ORIGINS = True
