@@ -100,7 +100,7 @@ class Patient(AbstractUser):
     email = models.CharField(max_length=250, unique=True)
     groupe_sanguin = models.CharField(max_length=2, choices=GROUPE_SANGUIN_CHOICES)
     rhesus = models.CharField(max_length=1, choices=RHESUS_CHOICES)
-    face_encoding = models.TextField(blank=True, null=True, help_text="Encodage pour la reconnaissance faciale")
+    face_encoding = models.BinaryField(null=True, blank=True)
     acte_mariage = models.OneToOneField(ActeMariage, on_delete=models.SET_NULL, null=True, blank=True)
     acte_naissance = models.OneToOneField(ActeNaissance, on_delete=models.SET_NULL, null=True, blank=True)
     allergies = models.ManyToManyField(Allergie, blank=True)

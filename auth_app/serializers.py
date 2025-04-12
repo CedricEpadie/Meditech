@@ -62,3 +62,11 @@ class AllergieSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Allergie
         fields = ['id', 'allergene', 'symptomes', 'gravite', 'traitement']
+        
+class FaceRegisterSerializer(serializers.Serializer):
+    image = serializers.ImageField()
+
+class FaceLoginSerializer(serializers.Serializer):
+    image = serializers.ImageField()
+    email = serializers.EmailField(required=True)
+    

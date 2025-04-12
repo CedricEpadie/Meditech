@@ -14,7 +14,10 @@ router.register('acte_naissance', viewset=views.ActeNaissanceView, basename='act
 router.register('contact_urgence', viewset=views.ContactUrgenceView, basename='contact_urgence')
 router.register('antecedent', viewset=views.AntecedentView, basename='antecedent')
 router.register('allergie', viewset=views.AllergieView, basename='allergie')
+router.register('face_register', viewset=views.FaceRegisterView, basename='face_register')
+router.register('face_login', viewset=views.FaceLoginView, basename='face_login')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('csrf/', views.get_csrf),
 ]

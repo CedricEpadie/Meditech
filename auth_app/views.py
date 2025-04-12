@@ -1,12 +1,19 @@
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from rest_framework import viewsets
 from rest_framework import status
+from .utils import get_face_encoding
 from auth_app import serializers, models
 
+from django.http import HttpResponse
 from django.contrib.auth import login, logout
+from django.views.decorators.csrf import ensure_csrf_cookie
 from .backends import EmailBackend
+
+import numpy as np
+import face_recognition
 
 class RegisterPatientView(viewsets.ModelViewSet):
     serializer_class = serializers.RegisterPatientSerializer
@@ -175,3 +182,61 @@ class AllergieView(viewsets.ModelViewSet):
             patient.allergies.add(allergie)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+class FaceRegisterView(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['post']
+    serializer_class = serializers.FaceRegisterSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if request.user.face_encoding is None:
+            if serializer.is_valid():
+                image = serializer.validated_data['image']
+                encoding = get_face_encoding(image)
+                if encoding is None:
+                    return Response({'error': 'Aucun visage détecté'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                request.user.face_encoding = encoding.tobytes()
+                request.user.save()
+                return Response({'message': 'Visage enregistré avec succes'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Visage déjà enregistré'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class FaceLoginView(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+    http_method_names = ['post']
+    serializer_class = serializers.FaceLoginSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            image = serializer.validated_data['image']
+            email = serializer.validated_data['email']
+            
+            input_encoding = get_face_encoding(image)
+            
+            if input_encoding is None:
+                return Response({"error": "Aucun visage détecté."}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                patient = models.Patient.objects.get(email=email)
+                known_encoding = np.frombuffer(patient.face_encoding)
+                match = face_recognition.compare_faces([known_encoding], input_encoding, tolerance=0.4)[0]
+                
+                if match:
+                    login(request, patient)
+                    patient_serializer = serializers.PatientSerializer(patient)
+                    return Response(patient_serializer.data, status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': 'Email or face_encoding don\'t match'})
+            except patient.DoesNotExist:
+                return Response({'error': 'Email or face_encoding don\'t match'})
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@ensure_csrf_cookie
+def get_csrf(request):
+    return HttpResponse("CSRF cookie set")
