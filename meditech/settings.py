@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_yasg',
     'auth_app.apps.AuthConfig',
+    'consultation',
 ]
 
 MIDDLEWARE = [

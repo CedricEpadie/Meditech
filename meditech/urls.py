@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
+from consultation.api  import app1
 
 from rest_framework.permissions import AllowAny
 from drf_yasg.views import get_schema_view
@@ -25,6 +26,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('auth_app.urls')),
+    path("api/",app1.urls),
 
     # Swagger UI
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
