@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from consultation.api import app1
-
+from ninja  import NinjaAPI
+from consultation.api import *
 from auth_app import views
 
 router = DefaultRouter()
@@ -20,7 +20,7 @@ router.register('face_login', viewset=views.FaceLoginView, basename='face_login'
 
 urlpatterns = [
     path('', include(router.urls)),
-    path("api/",app1.urls),
+    
     path('csrf/', views.get_csrf),
     
 ]
